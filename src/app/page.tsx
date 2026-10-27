@@ -44,7 +44,7 @@ export default async function Landing() {
             </div>
           </div>
 
-          <div aria-hidden className="relative mx-auto w-full max-w-sm">
+          <div aria-hidden className="relative mx-auto mb-12 w-full max-w-sm">
             <div className="rotate-2 rounded-3xl border border-line bg-surface p-4 shadow-xl">
               <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-brand-soft to-amber-soft" />
               <div className="mt-4 flex items-start justify-between gap-3">
@@ -56,7 +56,7 @@ export default async function Landing() {
               </div>
               <span className="mt-3 inline-flex rounded-full bg-amber-soft px-2.5 py-0.5 text-xs font-semibold text-amber">Reserved for you · 47h left</span>
             </div>
-            <div className="absolute -bottom-6 -left-4 -rotate-3 rounded-2xl border border-line bg-surface px-4 py-3 text-sm shadow-lg">
+            <div className="absolute -bottom-14 -left-4 -rotate-3 rounded-2xl border border-line bg-surface px-4 py-3 text-sm shadow-lg">
               <p className="font-semibold">Offer accepted: ₹350</p>
               <p className="text-muted">Item reserved for 48 hours</p>
             </div>
