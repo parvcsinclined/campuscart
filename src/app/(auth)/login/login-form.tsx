@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { loginSchema } from "@/lib/validation/auth";
 import { zodFieldErrorsClient } from "@/lib/form-utils";
 import { Button, Card, FormError, TextField } from "@/components/ui";
 
 export function LoginForm({ next }: { next: string }) {
-  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -37,8 +35,8 @@ export function LoginForm({ next }: { next: string }) {
         setPending(false);
         return;
       }
-      router.replace(next);
-      router.refresh();
+      // Full page load: guarantees nothing rendered for a previous session is reused.
+      window.location.assign(next);
     } catch {
       setError("Couldn't reach CampusCart. Check your connection and try again.");
       setPending(false);

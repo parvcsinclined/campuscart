@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { Logo } from "./logo";
+import { LogoutButton } from "./logout-button";
 
 const NAV = [
   { href: "/browse", label: "Browse", icon: "M11 4a7 7 0 1 0 4.2 12.6l3.6 3.6 1.4-1.4-3.6-3.6A7 7 0 0 0 11 4Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" },
@@ -19,7 +20,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, user }: { children: ReactNode; user: { name: string; email: string } }) {
   const pathname = usePathname();
   const unread = useUnreadCount(pathname);
   return (
@@ -27,6 +28,21 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4">
           <Logo href="/browse" />
+          {/* Current account, always visible (also on phones), so it's obvious who you're acting as. */}
+          <div className="ml-auto flex min-w-0 items-center gap-2 md:order-last md:ml-0">
+            <span className="hidden min-w-0 flex-col text-right leading-tight sm:flex" title={user.email}>
+              <span className="truncate text-sm font-semibold">{user.name}</span>
+              <span className="truncate text-xs text-muted">{user.email}</span>
+            </span>
+            <span
+              aria-hidden
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-soft font-display text-sm font-bold text-brand sm:hidden"
+              title={user.email}
+            >
+              {user.name.charAt(0).toUpperCase()}
+            </span>
+            <LogoutButton variant="ghost" className="h-9 px-3" />
+          </div>
           <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
             {NAV.map((item) => (
               <Link

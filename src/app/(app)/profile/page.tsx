@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import { pageVerifiedUser } from "@/lib/authz";
-import { signOut } from "@/lib/auth";
-import { Button, Card, PageHeader } from "@/components/ui";
+import { Card, PageHeader } from "@/components/ui";
+import { LogoutButton } from "@/components/logout-button";
 
 export const metadata: Metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
   const user = await pageVerifiedUser();
-
-  async function logout() {
-    "use server";
-    await signOut({ redirectTo: "/" });
-  }
 
   return (
     <>
@@ -27,11 +22,9 @@ export default async function ProfilePage() {
             </span>
           }
         />
-        <form action={logout} className="p-4">
-          <Button variant="secondary" type="submit" className="w-full sm:w-auto">
-            Log out
-          </Button>
-        </form>
+        <div className="p-4">
+          <LogoutButton className="w-full sm:w-auto" />
+        </div>
       </Card>
     </>
   );

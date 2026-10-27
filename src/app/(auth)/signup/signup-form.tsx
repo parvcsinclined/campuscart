@@ -50,14 +50,13 @@ export function SignupForm({ domains }: { domains: string[] }) {
       return;
     }
     if (res.data.verified) {
-      toast("Welcome to CampusCart!", "success");
-      router.replace("/browse");
-      router.refresh();
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload after an auth change, so no page cached for a previous account is reused
+      window.location.assign("/browse");
       return;
     }
     toast(res.data.emailSent ? "Account created! Check your inbox for a 6-digit code." : "Account created, but we couldn't send the email. Use “Resend code”.", res.data.emailSent ? "success" : "error");
-    router.replace("/verify");
-    router.refresh();
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload after an auth change, so no page cached for a previous account is reused
+    window.location.assign("/verify");
   }
 
   return (

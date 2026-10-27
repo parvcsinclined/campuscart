@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { verifySchema } from "@/lib/validation/auth";
 import { api } from "@/lib/api-client";
 import { Button, Card, FormError, TextField } from "@/components/ui";
@@ -10,7 +9,6 @@ import { useToast } from "@/components/toaster";
 const RESEND_COOLDOWN = 60;
 
 export function VerifyForm({ email }: { email: string }) {
-  const router = useRouter();
   const toast = useToast();
   const [pending, setPending] = useState(false);
   const [resending, setResending] = useState(false);
@@ -42,9 +40,8 @@ export function VerifyForm({ email }: { email: string }) {
       setPending(false);
       return;
     }
-    toast("Email verified. Welcome to CampusCart!", "success");
-    router.replace("/browse");
-    router.refresh();
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload after an auth change, so no page cached for a previous account is reused
+    window.location.assign("/browse");
   }
 
   async function resend() {
