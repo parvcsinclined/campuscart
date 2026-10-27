@@ -413,7 +413,8 @@ Times are estimates, starting at about 17:00 IST. Total ≈ 6½ h, leaving rough
 - [x] Loading, empty and error states on every page; toasts; mobile pass (390px via iframe check)
 - [x] Seed 12 realistic listings with photos (uploaded to Blob by the seed script); test data removed
 - [x] README with all GUIDELINES sections, Mermaid architecture and lifecycle diagrams, engineering decisions, limitations, demo credentials
-- [ ] Final deploy, prod seed, full Chrome smoke test as both users, links checked in an incognito window
+- [x] Final deploy and prod seed (shared DB); public-page smoke test done
+- [ ] Logged-in smoke test on production as seller and buyer, and an incognito link check (user)
 
 **If time runs short, cut in this order:** photo reordering, counter-offers (keep accept/reject/withdraw), the nav unread badge (keep inbox counts), and the seller timeline UI (events are still recorded).
 
