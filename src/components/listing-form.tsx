@@ -41,7 +41,7 @@ export function ListingForm(props: Props) {
       return;
     }
     if (props.mode === "create") {
-      toast("Draft saved. Now add photos.", "success");
+      toast("Draft saved. It's not public yet: add a photo and press Publish.", "success");
       router.push(`/listings/${(res.data as { id: string }).id}/edit`);
     } else {
       toast("Changes saved.", "success");

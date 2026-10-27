@@ -131,6 +131,15 @@ export async function listMyListings(userId: string) {
   });
 }
 
+/** Unpublished drafts, so the owner can be reminded that buyers can't see them yet. */
+export async function listMyDrafts(userId: string) {
+  return db.listing.findMany({
+    where: { sellerId: userId, publishedAt: null },
+    orderBy: { updatedAt: "desc" },
+    select: { id: true, title: true, _count: { select: { images: true } } },
+  });
+}
+
 /** Status history for the seller's timeline. */
 export async function listListingEvents(listingId: string) {
   return db.listingEvent.findMany({

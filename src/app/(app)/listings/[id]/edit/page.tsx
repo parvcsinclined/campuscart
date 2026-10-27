@@ -39,6 +39,13 @@ export default async function EditListingPage({ params }: PageProps<"/listings/[
         }
       />
 
+      {isDraft && (
+        <div role="status" className="mb-4 rounded-xl border border-amber/40 bg-amber-soft px-4 py-3 text-sm">
+          <b>Not visible to buyers yet.</b> This is a draft. Add at least one photo, then press <b>Publish listing</b> so other students can find it in
+          Browse.
+        </div>
+      )}
+
       {sold && (
         <p className="mb-4 rounded-xl border border-line bg-sold-soft px-4 py-3 text-sm">This item is sold, so its details are locked.</p>
       )}

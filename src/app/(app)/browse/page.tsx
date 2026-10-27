@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { pageVerifiedUser } from "@/lib/authz";
 import { searchListings } from "@/lib/services/search";
+import { listMyDrafts } from "@/lib/services/listings";
 import { parseSearchParams, toQueryString } from "@/lib/validation/search";
 import { ButtonLink, EmptyState, PageHeader } from "@/components/ui";
 import { FilterBar } from "@/components/filter-bar";
@@ -10,9 +11,9 @@ import { ListingCard } from "@/components/listing-card";
 export const metadata: Metadata = { title: "Browse" };
 
 export default async function BrowsePage({ searchParams }: PageProps<"/browse">) {
-  await pageVerifiedUser();
+  const user = await pageVerifiedUser();
   const filters = parseSearchParams(await searchParams);
-  const result = await searchListings(filters);
+  const [result, drafts] = await Promise.all([searchListings(filters), listMyDrafts(user.id)]);
   const hasQuery = Boolean(filters.q || filters.category || filters.condition || filters.minPrice !== undefined || filters.maxPrice !== undefined);
 
   return (
@@ -23,6 +24,23 @@ export default async function BrowsePage({ searchParams }: PageProps<"/browse">)
         subtitle="Second-hand finds from students on your campus."
         action={<ButtonLink href="/sell">+ Sell an item</ButtonLink>}
       />
+      {drafts.length > 0 && (
+        <div role="status" className="mb-4 rounded-2xl border border-amber/40 bg-amber-soft p-4 text-sm">
+          <p className="font-semibold">
+            You have {drafts.length} unpublished draft{drafts.length === 1 ? "" : "s"}, which other students can&apos;t see yet.
+          </p>
+          <p className="mt-0.5 text-muted">Add at least one photo and press Publish to make it appear in Browse.</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {drafts.map((d) => (
+              <li key={d.id}>
+                <Link href={`/listings/${d.id}/edit`} className="inline-flex rounded-lg bg-surface px-3 py-1.5 font-semibold text-ink hover:underline">
+                  {d.title} · {d._count.images ? "Publish →" : "Add photos →"}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {/* key resets the uncontrolled inputs when the URL changes (e.g. "Clear all"). */}
       <FilterBar key={toQueryString(filters)} filters={filters} sort={result.sort} />
 
