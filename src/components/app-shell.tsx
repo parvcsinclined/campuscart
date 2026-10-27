@@ -9,7 +9,7 @@ const NAV = [
   { href: "/browse", label: "Browse", icon: "M11 4a7 7 0 1 0 4.2 12.6l3.6 3.6 1.4-1.4-3.6-3.6A7 7 0 0 0 11 4Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" },
   { href: "/sell", label: "Sell", icon: "M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z" },
   { href: "/inbox", label: "Inbox", icon: "M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8l-4 3V6a1 1 0 0 1 1-1Zm1 2v9.2L7.3 15H19V7Z" },
-  { href: "/my/listings", label: "My listings", icon: "M5 4h14v2H5zm0 5h14v2H5zm0 5h14v2H5zm0 5h9v2H5z" },
+  { href: "/my/listings", label: "My listings", short: "Listings", icon: "M5 4h14v2H5zm0 5h14v2H5zm0 5h14v2H5zm0 5h9v2H5z" },
   { href: "/my/purchases", label: "Purchases & sales", short: "Orders", icon: "M7 4h10l1 4H6zm-2 6h14l-1.2 9.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z" },
   { href: "/profile", label: "Profile", icon: "M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0 10c4.4 0 8 2 8 4.5V20H4v-1.5C4 16 7.6 14 12 14Z" },
 ];
@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <svg viewBox="0 0 24 24" aria-hidden className="size-6 fill-current">
               <path d={item.icon} />
             </svg>
-            <span className="truncate">{item.short ?? item.label.replace("My ", "")}</span>
+            <span className="truncate">{item.short ?? item.label}</span>
             {item.href === "/inbox" && unread > 0 && <UnreadDot count={unread} mobile />}
           </Link>
         ))}
