@@ -4,6 +4,7 @@ import { conflict, notFound, badRequest } from "../errors";
 import { assertListingOwner } from "../authz";
 import { deleteBlobs } from "../blob";
 import type { ListingInput } from "../validation/listing";
+import { expireStaleReservations } from "./lifecycle";
 
 export const listingCardSelect = {
   id: true,
@@ -71,6 +72,7 @@ export async function deleteListing(userId: string, listingId: string) {
 
 /** Detail view. Drafts are only visible to their owner; everyone else gets a 404. */
 export async function getListingForViewer(listingId: string, viewerId: string) {
+  await expireStaleReservations([listingId]);
   const listing = await db.listing.findUnique({
     where: { id: listingId },
     select: {
@@ -121,9 +123,24 @@ export async function getListingForEdit(userId: string, listingId: string) {
 }
 
 export async function listMyListings(userId: string) {
+  await expireStaleReservations();
   return db.listing.findMany({
     where: { sellerId: userId },
     orderBy: { updatedAt: "desc" },
     select: listingCardSelect,
   });
+}
+
+/** Status history for the seller's timeline. */
+export async function listListingEvents(listingId: string) {
+  return db.listingEvent.findMany({
+    where: { listingId },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: { id: true, fromStatus: true, toStatus: true, reason: true, createdAt: true, actor: { select: { name: true } } },
+  });
+}
+
+export async function findBuyerConversation(listingId: string, buyerId: string) {
+  return db.conversation.findUnique({ where: { listingId_buyerId: { listingId, buyerId } }, select: { id: true } });
 }

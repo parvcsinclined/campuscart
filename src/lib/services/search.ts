@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { db } from "../db";
 import { PAGE_SIZE, effectiveSort, toPrefixTsQuery, type SearchFilters } from "../validation/search";
 import type { ListingCardData } from "@/components/listing-card";
+import { expireStaleReservations } from "./lifecycle";
 
 type Row = Omit<ListingCardData, "images"> & { coverUrl: string | null; total: bigint };
 
@@ -12,6 +13,7 @@ type Row = Omit<ListingCardData, "images"> & { coverUrl: string | null; total: b
  * the only interpolated SQL fragments are fixed strings chosen in code.
  */
 export async function searchListings(f: SearchFilters) {
+  await expireStaleReservations();
   const tsQuery = toPrefixTsQuery(f.q);
   const sort = effectiveSort(f);
   const statuses = f.reserved ? ["AVAILABLE", "RESERVED"] : ["AVAILABLE"];
