@@ -65,7 +65,8 @@ export function VerifyForm({ email }: { email: string }) {
     <Card className="p-6 sm:p-8">
       <h1 className="font-display text-3xl font-bold tracking-tight">Check your email</h1>
       <p className="mt-1 text-sm text-muted">
-        We sent a 6-digit code to <span className="font-medium text-ink">{email}</span>. It expires in 15 minutes.
+        Enter the 6-digit code emailed to <span className="font-medium text-ink">{email}</span>. Codes expire after 15 minutes. Check your spam folder, or
+        use &ldquo;Resend code&rdquo; to get a new one.
       </p>
       <form onSubmit={onSubmit} noValidate className="mt-6 flex flex-col gap-4">
         <FormError message={error} />
