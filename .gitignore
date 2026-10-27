@@ -1,0 +1,29 @@
+# project requirements doc (kept local only)
+GUIDELINES.md
+
+# dependencies
+node_modules/
+
+# next.js / build
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# env files (only .env.example is committed)
+.env
+.env*.local
+.env.*
+!.env.example
+
+# vercel
+.vercel/
+
+# testing
+coverage/
+
+# misc
+.DS_Store
+*.log
+/src/generated/
