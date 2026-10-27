@@ -47,7 +47,64 @@ CampusCart makes the marketplace software rather than a chat thread:
 
 ## Architecture
 
-_(Diagram added in Phase 6.)_
+```mermaid
+flowchart LR
+    subgraph Browser["Browser (phone or laptop)"]
+        UI["React UI<br/>Server + Client Components"]
+        IMG["Image compressor<br/>(canvas → WebP)"]
+        POLL["Thread poller<br/>(every 4 s)"]
+    end
+
+    subgraph Vercel["Vercel: Next.js 16 (Node runtime)"]
+        PROXY["proxy.ts<br/>optimistic session check"]
+        PAGES["Server Components<br/>(read via services)"]
+        API["Route Handlers /api/*<br/>Zod → service → AppError → HTTP status"]
+        AUTH["Auth.js credentials<br/>JWT in httpOnly cookie"]
+        subgraph Core["src/lib"]
+            AUTHZ["authz.ts<br/>requireVerifiedUser · assertOwner · assertParticipant"]
+            DOMAIN["domain/<br/>listing-state · offer-rules (pure)"]
+            SVC["services/<br/>listings · lifecycle · offers · conversations · search · images"]
+        end
+    end
+
+    DB[("Neon Postgres<br/>Prisma 7 + adapter-pg<br/>FTS GIN index · partial unique index")]
+    BLOB[("Vercel Blob<br/>listing photos")]
+    SMTP["SMTP<br/>verification codes"]
+
+    UI --> PROXY --> PAGES
+    UI -- "fetch JSON" --> API
+    POLL -- "GET ?after=" --> API
+    PAGES --> AUTHZ
+    API --> AUTHZ --> SVC
+    AUTH --> DB
+    SVC --> DOMAIN
+    SVC -- "pooled URL" --> DB
+    API -- "issueSignedToken (OIDC)" --> BLOB
+    IMG -- "presigned PUT" --> BLOB
+    SVC -- "head / del" --> BLOB
+    SVC --> SMTP
+```
+
+### Listing lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft: seller saves details
+    Draft --> AVAILABLE: publish (needs ≥1 photo)
+    AVAILABLE --> RESERVED: seller reserves / offer accepted
+    RESERVED --> AVAILABLE: seller cancels / buyer backs out / 48h expiry (lazy)
+    RESERVED --> SOLD: seller marks sold → Transaction
+    AVAILABLE --> WITHDRAWN: owner withdraws
+    RESERVED --> WITHDRAWN: owner withdraws
+    WITHDRAWN --> AVAILABLE: owner relists
+    SOLD --> [*]
+```
+
+Every arrow is one entry in `TRANSITIONS` (`src/lib/domain/listing-state.ts`). It runs as a conditional atomic update and writes a `ListingEvent` (who, from, to, when), which the seller sees as a timeline. Offers follow their own rules (`offer-rules.ts`): `PENDING → ACCEPTED | REJECTED | COUNTERED | WITHDRAWN | EXPIRED`.
+
+### Data model
+
+`User` · `VerificationToken` · `Listing` (+ generated `searchVector`) · `ListingImage` · `Conversation` (unique per listing + buyer) · `Message` (TEXT / OFFER / SYSTEM) · `Offer` (one PENDING per conversation) · `Transaction` (unique per listing) · `ListingEvent` · `RateLimit`. See `prisma/schema.prisma` and the init migration for the indexes behind search, filters and inbox queries.
 
 - `src/lib/domain`: pure rules (listing state machine, offer rules), unit-tested.
 - `src/lib/services`: database work for each feature. All business rules live here, not in routes.
@@ -67,6 +124,7 @@ cp .env.example .env             # fill in values (see below)
 vercel link && vercel env pull .env.local
 npx prisma migrate deploy        # create tables, search index and constraints
 npm run db:seed                  # demo accounts
+npm run db:seed:demo             # optional: 12 demo listings with photos + sample negotiations
 npm run dev                      # http://localhost:3000
 ```
 
@@ -85,6 +143,12 @@ Without SMTP configured, verification codes are printed in the dev server log.
 | `BLOB_STORE_ID` | Vercel Blob store ID (set automatically when the store is connected). |
 | `VERCEL_OIDC_TOKEN` | Short-lived OIDC token used by Blob. Injected on Vercel; locally it comes from `vercel env pull`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` | SMTP settings for verification emails (e.g. Gmail with an App Password). |
+
+## Demo walkthrough
+
+1. Log in as **seller@example.edu**. The inbox has a pending ₹550 offer on *CLRS*: accept, counter or decline it. *Engineering drawing kit* is reserved for Rohan: open the conversation to **Mark as sold** or **Cancel reservation**. Open any of your listings to see the status timeline.
+2. Log in as **buyer@example.edu** in another browser. Browse and filter, message a seller, make an offer, and watch the seller's response arrive within seconds. *My purchases* shows a completed sale.
+3. Log in as **buyer2@example.edu** and make an offer on the same item as Rohan. When the seller accepts one, the other offer expires with an explanation.
 
 ## Deployment
 
@@ -110,7 +174,15 @@ Deployed on Vercel from the `main` branch: every push builds and deploys. Neon P
 
 ## Known limitations
 
+- Demo listing photos are generated illustrations (rendered with `sharp` by `prisma/seed-demo.ts`). Uploads by real users store their actual photos.
+- Email delivery depends on the configured SMTP account. Without it in production, new users can't receive their verification code; the demo accounts are pre-verified.
+- One database serves development and production for this submission. A real deployment would use a separate Neon branch per environment.
+
 - New messages arrive within about 4 seconds (polling), not instantly.
 - Reservation expiry is applied when someone next views or acts on the listing, not at the exact 48-hour mark. The effect is the same from every user's point of view.
 
 - Pages under the app shell show a streaming loading skeleton. As a result, "not found" pages render the 404 UI with `noindex`, but the HTTP status is 200 rather than 404. API routes always return proper status codes.
+
+## Originality
+
+CampusCart was built from scratch for this project. It uses the open-source libraries listed under Tech stack, but it isn't based on an existing template or tutorial project.
