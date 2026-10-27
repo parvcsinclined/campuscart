@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* CampusCart design tokens. Warm paper background, campus-green brand, amber for "reserved". */
+:root {
+  --bg: #f7f5ef;
+  --surface: #ffffff;
+  --surface-2: #f0ede4;
+  --ink: #1d1b16;
+  --muted: #6a645a;
+  --line: #e4dfd3;
+  --brand: #0e6b50;
+  --brand-ink: #ffffff;
+  --brand-soft: #dcefe6;
+  --amber: #b45309;
+  --amber-soft: #fdf0d8;
+  --danger: #b42318;
+  --danger-soft: #fde7e4;
+  --sold: #475467;
+  --sold-soft: #e9ecf0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12110e;
+    --surface: #1b1a16;
+    --surface-2: #24221d;
+    --ink: #f3f0e8;
+    --muted: #a59f93;
+    --line: #2f2c26;
+    --brand: #3cc595;
+    --brand-ink: #08291e;
+    --brand-soft: #143528;
+    --amber: #f2b05e;
+    --amber-soft: #3a2a12;
+    --danger: #f97066;
+    --danger-soft: #3d1714;
+    --sold: #b4bcc8;
+    --sold-soft: #262a30;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-sold: var(--sold);
+  --color-sold-soft: var(--sold-soft);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
