@@ -369,7 +369,7 @@ Times are estimates, starting at about 17:00 IST. Total ≈ 6½ h, leaving rough
 - [x] Install `gh` and `vercel` CLIs, set git identity, confirm the GitHub repo exists
 - [x] Scaffold Next.js + Tailwind + ESLint + Vitest; Prisma init; `.env.example`
 - [x] Vercel project link; add Neon from the Storage tab; `vercel env pull`
-- [ ] Blob store connected to the project (BLOB_READ_WRITE_TOKEN missing; needed for Phase 2)
+- [x] Blob store connected (OIDC: `BLOB_STORE_ID` + `VERCEL_OIDC_TOKEN`, no read-write token)
 - [x] Full schema + first migration (including the partial index and tsvector)
 - [x] `env.ts`, `errors.ts`, `rate-limit.ts`, `authz.ts`, `email.ts`
 - [x] Sign up with domain allowlist, bcrypt, Auth.js credentials login, verify code, logout
@@ -380,11 +380,11 @@ Times are estimates, starting at about 17:00 IST. Total ≈ 6½ h, leaving rough
 - Notes: Next 16.4 with Cache Components off; Prisma 7.10.1 + `@prisma/adapter-pg`; dev and prod share one Neon DB; live at https://campuscart-mu-navy.vercel.app
 
 ### Phase 2 — Listings and photos (~75 min)
-- [ ] Listing Zod schemas, create draft, edit, publish, delete, with field errors
-- [ ] Blob token route, attach/delete/reorder image routes
-- [ ] PhotoUploader: client resize, per-photo progress, error and retry
-- [ ] Listing detail page with gallery and status badge
-- [ ] Check → commit → push → deploy → smoke test
+- [x] Listing Zod schemas, create draft, edit, publish, delete, with field errors
+- [x] Blob presigned-upload route (OIDC), attach/delete image routes (reorder cut: first photo = cover)
+- [x] PhotoUploader: client resize, per-photo progress, error and retry
+- [x] Listing detail page with gallery and status badge (+ My listings grouped by status, pulled forward from Phase 3)
+- [x] Check → commit → push → deploy → smoke test (prod upload to be confirmed by user login)
 
 ### Phase 3 — Search and filters (~35 min)
 - [ ] `services/search.ts`: FTS (`websearch_to_tsquery`) + filters + sort + pagination via `Prisma.sql`
