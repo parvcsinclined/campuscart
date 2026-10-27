@@ -1,0 +1,228 @@
+// CampusCart data model. See docs/PLAN.md §4 for the reasoning behind each table.
+// Connection URLs live in prisma.config.ts (migrations) and src/lib/db.ts (runtime).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  TEXTBOOKS
+  CALCULATORS
+  FURNITURE
+  ELECTRONICS
+  OTHER
+}
+
+enum Condition {
+  NEW
+  LIKE_NEW
+  GOOD
+  FAIR
+}
+
+enum ListingStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  WITHDRAWN
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COUNTERED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum MessageType {
+  TEXT
+  OFFER
+  SYSTEM
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String    @db.VarChar(80)
+  email         String    @unique // stored lowercased
+  passwordHash  String
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+
+  listings            Listing[]           @relation("SellerListings")
+  reservations        Listing[]           @relation("ReservedFor")
+  verificationTokens  VerificationToken[]
+  buyerConversations  Conversation[]      @relation("BuyerConversations")
+  sellerConversations Conversation[]      @relation("SellerConversations")
+  messages            Message[]
+  offersProposed      Offer[]
+  purchases           Transaction[]       @relation("Buyer")
+  sales               Transaction[]       @relation("Seller")
+  listingEvents       ListingEvent[]
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  codeHash  String // sha256(code + AUTH_SECRET); the plain code is never stored
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Listing {
+  id             String                   @id @default(cuid())
+  sellerId       String
+  title          String                   @db.VarChar(120)
+  description    String                   @db.VarChar(4000)
+  category       Category
+  condition      Condition
+  priceInr       Int
+  pickupLocation String                   @db.VarChar(120)
+  status         ListingStatus            @default(AVAILABLE)
+  publishedAt    DateTime? // null = draft
+  reservedForId  String?
+  reservedPrice  Int?
+  reservedUntil  DateTime? // checked lazily, see expireStaleReservations
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  // Generated column; the expression is defined in the init migration SQL.
+  searchVector   Unsupported("tsvector")?
+
+  seller        User           @relation("SellerListings", fields: [sellerId], references: [id], onDelete: Cascade)
+  reservedFor   User?          @relation("ReservedFor", fields: [reservedForId], references: [id], onDelete: SetNull)
+  images        ListingImage[]
+  conversations Conversation[]
+  offers        Offer[]
+  events        ListingEvent[]
+  transaction   Transaction?
+
+  @@index([searchVector], type: Gin)
+  @@index([status, publishedAt, createdAt])
+  @@index([status, category])
+  @@index([status, priceInr])
+  @@index([sellerId, status])
+  @@index([status, reservedUntil])
+}
+
+model ListingImage {
+  id        String   @id @default(cuid())
+  listingId String
+  url       String
+  pathname  String // blob pathname, used for del()
+  position  Int
+  createdAt DateTime @default(now())
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, position])
+}
+
+model Conversation {
+  id               String   @id @default(cuid())
+  listingId        String
+  buyerId          String
+  sellerId         String // denormalised for inbox queries
+  lastMessageAt    DateTime @default(now())
+  buyerLastReadAt  DateTime @default(now())
+  sellerLastReadAt DateTime @default(now())
+  createdAt        DateTime @default(now())
+
+  listing  Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer    User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller   User      @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+  messages Message[]
+  offers   Offer[]
+
+  @@unique([listingId, buyerId])
+  @@index([buyerId, lastMessageAt])
+  @@index([sellerId, lastMessageAt])
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  senderId       String? // null for SYSTEM messages
+  type           MessageType @default(TEXT)
+  body           String      @db.VarChar(2000)
+  offerId        String?
+  createdAt      DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User?        @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  offer        Offer?       @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+}
+
+// One PENDING offer per conversation is enforced by the partial unique index
+// "Offer_one_pending_per_conversation" in the init migration SQL.
+model Offer {
+  id             String      @id @default(cuid())
+  conversationId String
+  listingId      String
+  proposerId     String
+  amountInr      Int
+  status         OfferStatus @default(PENDING)
+  counterOfId    String?     @unique
+  respondedAt    DateTime?
+  createdAt      DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  listing      Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  proposer     User         @relation(fields: [proposerId], references: [id], onDelete: Cascade)
+  counterOf    Offer?       @relation("CounterChain", fields: [counterOfId], references: [id])
+  counteredBy  Offer?       @relation("CounterChain")
+  messages     Message[]
+  transaction  Transaction?
+
+  @@index([listingId, status])
+  @@index([conversationId, createdAt])
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  listingId   String   @unique
+  buyerId     String
+  sellerId    String
+  offerId     String?  @unique
+  finalPrice  Int
+  completedAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer   User    @relation("Buyer", fields: [buyerId], references: [id])
+  seller  User    @relation("Seller", fields: [sellerId], references: [id])
+  offer   Offer?  @relation(fields: [offerId], references: [id])
+
+  @@index([buyerId, completedAt])
+  @@index([sellerId, completedAt])
+}
+
+model ListingEvent {
+  id         String         @id @default(cuid())
+  listingId  String
+  actorId    String? // null = system (e.g. reservation expiry)
+  fromStatus ListingStatus? // null for publish
+  toStatus   ListingStatus
+  reason     String?        @db.VarChar(60)
+  createdAt  DateTime       @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  actor   User?   @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([listingId, createdAt])
+}
+
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+}
