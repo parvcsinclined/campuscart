@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Logo } from "./logo";
 
 const NAV = [
@@ -19,8 +19,9 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function AppShell({ children, unread = 0 }: { children: ReactNode; unread?: number }) {
+export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const unread = useUnreadCount(pathname);
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
@@ -76,4 +77,30 @@ function UnreadDot({ count, mobile }: { count: number; mobile?: boolean }) {
       {count > 99 ? "99+" : count}
     </span>
   );
+}
+
+/** Polls the unread total for the nav badge; re-checks on navigation and when the tab regains focus. */
+function useUnreadCount(pathname: string) {
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      if (document.hidden) return;
+      try {
+        const res = await fetch("/api/inbox/unread", { cache: "no-store" });
+        if (res.ok && alive) setUnread((await res.json()).unread ?? 0);
+      } catch {
+        // Badge is best-effort; ignore network blips.
+      }
+    };
+    void load();
+    const timer = setInterval(load, 15000);
+    document.addEventListener("visibilitychange", load);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", load);
+    };
+  }, [pathname]);
+  return unread;
 }
