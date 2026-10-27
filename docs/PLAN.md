@@ -366,16 +366,17 @@ src/
 Times are estimates, starting at about 17:00 IST. Total ≈ 6½ h, leaving roughly 30 min of buffer.
 
 ### Phase 1 — Setup, auth, campus restriction, first deploy (~75 min)
-- [ ] Install `gh` and `vercel` CLIs, set git identity, confirm the GitHub repo exists
-- [ ] Scaffold Next.js + Tailwind + ESLint + Vitest; Prisma init; `.env.example`
-- [ ] Vercel project link; add Neon and Blob from the Storage tab (you click); `vercel env pull`
-- [ ] Full schema + first migration (including the partial index and tsvector)
-- [ ] `env.ts`, `errors.ts`, `rate-limit.ts`, `authz.ts`, `email.ts`
-- [ ] Sign up with domain allowlist, bcrypt, Auth.js credentials login, verify code, logout
-- [ ] Landing page, app layout with nav, route protection
-- [ ] Seed two demo users (`seller@example.edu`, `buyer@example.edu`)
-- [ ] Unit tests for authz helpers
-- [ ] lint + typecheck + test → Chrome test → commit and push → **deploy, run migrations on prod, seed demo users, smoke test**
+- [x] Install `gh` and `vercel` CLIs, set git identity, confirm the GitHub repo exists
+- [x] Scaffold Next.js + Tailwind + ESLint + Vitest; Prisma init; `.env.example`
+- [x] Vercel project link; add Neon and Blob from the Storage tab (you click); `vercel env pull`
+- [x] Full schema + first migration (including the partial index and tsvector)
+- [x] `env.ts`, `errors.ts`, `rate-limit.ts`, `authz.ts`, `email.ts`
+- [x] Sign up with domain allowlist, bcrypt, Auth.js credentials login, verify code, logout
+- [x] Landing page, app layout with nav, route protection
+- [x] Seed two demo users (`seller@example.edu`, `buyer@example.edu`)
+- [x] Unit tests for authz helpers
+- [x] lint + typecheck + test → Chrome test → commit and push → **deploy, run migrations on prod, seed demo users, smoke test**
+- Notes: Next 16.4 with Cache Components off; Prisma 7.10.1 + `@prisma/adapter-pg`; dev and prod share one Neon DB; live at https://campuscart-mu-navy.vercel.app
 
 ### Phase 2 — Listings and photos (~75 min)
 - [ ] Listing Zod schemas, create draft, edit, publish, delete, with field errors
