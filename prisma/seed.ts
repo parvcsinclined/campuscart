@@ -12,6 +12,7 @@ export const DEMO_PASSWORD = "CampusCart-demo-2026";
 export const DEMO_USERS = [
   { email: "seller@example.edu", name: "Ananya Seller (demo)" },
   { email: "buyer@example.edu", name: "Rohan Buyer (demo)" },
+  { email: "buyer2@example.edu", name: "Meera Buyer (demo)" },
 ];
 
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }) });
