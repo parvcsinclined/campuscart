@@ -27,3 +27,5 @@ coverage/
 .DS_Store
 *.log
 /src/generated/
+.env*
+!.env.example
