@@ -26,7 +26,9 @@ CampusCart makes the marketplace software rather than a chat thread:
 - **Campus-restricted accounts:** domain allowlist (exact match), bcrypt-hashed passwords, 6-digit email verification codes (hashed, 15-minute expiry, 5 attempts), and rate-limited sign-up and login.
 - **Listings with photos:** title, description, category, condition, integer INR price and campus pickup point. Each listing has 1–5 photos, which are compressed in the browser and uploaded directly to Vercel Blob with per-photo progress, errors and retry. Drafts stay private until published.
 - **Ownership rules:** only the seller can edit, publish or delete. Sold listings are locked. Listings that buyers have already messaged about can only be withdrawn, not deleted.
-- _More sections are added as each phase ships: search & filters, messaging & offers, reservations & lifecycle._
+- **Search & filters:** prefix keyword search over title and description (Postgres full-text search on a generated, weighted `tsvector` column with a GIN index). Filter by category, condition, price range and status (Available by default, optionally Reserved). Sort by best match, newest or price, with pagination. All state lives in the URL, so searches can be shared and survive a refresh.
+- **My listings,** grouped into Drafts, Available, Reserved, Sold and Withdrawn.
+- _More sections are added as each phase ships: messaging & offers, reservations & lifecycle._
 
 ## Tech stack
 
@@ -95,6 +97,7 @@ Deployed on Vercel from the `main` branch: every push builds and deploys. Neon P
 ## Key engineering decisions
 
 - **Direct-to-storage uploads with OIDC.** The server checks that you're logged in and own the listing, then issues a presigned upload URL scoped to one exact pathname, `put` only, JPEG/PNG/WebP, at most 5 MB, valid for 10 minutes. The browser resizes the photo to at most 1600 px WebP and uploads it straight to Blob. A separate attach call then re-checks ownership and asks Blob for the object's real type and size before saving it. Upload webhooks can't reach `localhost`, which is why attaching is an explicit step.
+- **Search in Postgres, not a search service.** A `GENERATED ALWAYS … STORED` tsvector (title weighted above description) stays in sync automatically, and a GIN index serves the `@@` match. User text is reduced to letters and digits and turned into a prefix query (`casio:* & calc:*`), so input can't inject tsquery syntax. Filters, sort and `COUNT(*) OVER()` pagination run in one parameterised query.
 - **Rate limits in Postgres.** One atomic `INSERT … ON CONFLICT DO UPDATE` per check. In-memory counters don't work across serverless instances, and this avoids adding Redis.
 
 ## Known limitations

@@ -387,10 +387,10 @@ Times are estimates, starting at about 17:00 IST. Total ≈ 6½ h, leaving rough
 - [x] Check → commit → push → deploy → smoke test (prod upload to be confirmed by user login)
 
 ### Phase 3 — Search and filters (~35 min)
-- [ ] `services/search.ts`: FTS (`websearch_to_tsquery`) + filters + sort + pagination via `Prisma.sql`
-- [ ] Browse page with URL-synced FilterBar, empty state, pagination
-- [ ] My listings grouped by status
-- [ ] Check → commit → push → deploy → smoke test
+- [x] `services/search.ts`: FTS (`websearch_to_tsquery`) + filters + sort + pagination via `Prisma.sql`
+- [x] Browse page with URL-synced FilterBar, empty state, pagination
+- [x] My listings grouped by status
+- [x] Check → commit → push → deploy → smoke test
 
 ### Phase 4 — Inquiries, messaging, offers (~75 min)
 - [ ] Open or reuse a conversation; owner blocked
