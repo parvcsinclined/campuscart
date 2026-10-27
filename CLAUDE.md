@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**CampusCart** is a buy-and-sell marketplace for students of one college, verified by college email. The full plan, Prisma schema, state machines, routes and progress checklist are in `docs/PLAN.md`; keep its checklist updated. The official requirements and rubric are in `GUIDELINES.md` (gitignored, local only), and every decision must satisfy them. The deadline is **27 Oct 2026, 11:59 PM IST**. Five working core workflows matter more than extra features.
+**CampusCart** is a buy-and-sell marketplace for students of one college, restricted to college email domains. Email-code verification is optional via `EMAIL_VERIFICATION` (`off` by default and in production); `getCurrentUser().isVerified` is the single source of truth, so use it rather than `emailVerified`. The full plan, Prisma schema, state machines, routes and progress checklist are in `docs/PLAN.md`; keep its checklist updated. The official requirements and rubric are in `GUIDELINES.md` (gitignored, local only), and every decision must satisfy them. The deadline is **27 Oct 2026, 11:59 PM IST**. Five working core workflows matter more than extra features.
 
 Stack: Next.js App Router (TS, Node runtime), Prisma + Neon Postgres, Vercel Blob, Auth.js v5 Credentials (bcrypt, JWT in an httpOnly cookie), Zod, Tailwind and Vitest. It is deployed on Vercel.
 

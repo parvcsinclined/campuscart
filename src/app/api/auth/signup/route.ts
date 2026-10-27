@@ -7,6 +7,6 @@ import { registerUser } from "@/lib/services/users";
 export const POST = withErrorHandling(async (req) => {
   await rateLimit(`signup:ip:${clientIp(req)}`, 5, 60 * 60);
   const input = signupSchema.parse(await readJson(req));
-  const { emailSent } = await registerUser(input);
-  return NextResponse.json({ ok: true, emailSent }, { status: 201 });
+  const { emailSent, verified } = await registerUser(input);
+  return NextResponse.json({ ok: true, emailSent, verified }, { status: 201 });
 });

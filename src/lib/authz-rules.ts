@@ -5,9 +5,9 @@ export type SessionUser = { id: string; emailVerified: Date | null };
 
 export type AuthzResult = "ok" | "unauthenticated" | "not_verified" | "forbidden";
 
-export function checkVerified(user: SessionUser | null): AuthzResult {
+export function checkVerified(user: SessionUser | null, verificationRequired = true): AuthzResult {
   if (!user) return "unauthenticated";
-  if (!user.emailVerified) return "not_verified";
+  if (verificationRequired && !user.emailVerified) return "not_verified";
   return "ok";
 }
 

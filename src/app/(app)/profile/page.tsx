@@ -23,7 +23,7 @@ export default async function ProfilePage() {
           label="Status"
           value={
             <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand">
-              ✓ Verified student
+              ✓ Campus member
             </span>
           }
         />

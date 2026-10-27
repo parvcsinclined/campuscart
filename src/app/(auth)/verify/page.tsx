@@ -7,6 +7,6 @@ export const metadata: Metadata = { title: "Verify your email" };
 
 export default async function VerifyPage() {
   const user = await pageUser();
-  if (user.emailVerified) redirect("/browse");
+  if (user.isVerified) redirect("/browse");
   return <VerifyForm email={user.email} />;
 }

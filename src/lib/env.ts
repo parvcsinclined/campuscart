@@ -12,6 +12,9 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   AUTH_SECRET: z.string().min(16, "AUTH_SECRET is required (run `npx auth secret`)"),
   ALLOWED_EMAIL_DOMAINS: z.string().min(1, "ALLOWED_EMAIL_DOMAINS is required"),
+  // "required": new accounts must enter an emailed 6-digit code. "off" (default): the
+  // campus-domain check at sign-up is the only gate, and accounts are active immediately.
+  EMAIL_VERIFICATION: z.enum(["required", "off"]).default("off"),
   BLOB_READ_WRITE_TOKEN: optional,
   SMTP_HOST: optional,
   SMTP_PORT: optional,
@@ -32,6 +35,10 @@ export function env() {
     cached = parsed.data;
   }
   return cached;
+}
+
+export function emailVerificationRequired(): boolean {
+  return env().EMAIL_VERIFICATION === "required";
 }
 
 export function allowedEmailDomains(): string[] {

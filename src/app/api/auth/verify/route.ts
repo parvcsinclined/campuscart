@@ -7,7 +7,7 @@ import { verifyEmailCode } from "@/lib/services/users";
 
 export const POST = withErrorHandling(async (req) => {
   const user = await requireUser();
-  if (user.emailVerified) return NextResponse.json({ ok: true, alreadyVerified: true });
+  if (user.isVerified) return NextResponse.json({ ok: true, alreadyVerified: true });
   await rateLimit(`verify:user:${user.id}`, 15, 15 * 60);
   const { code } = verifySchema.parse(await readJson(req));
   await verifyEmailCode(user.id, code);

@@ -2,7 +2,7 @@ import "server-only";
 import { createHash, randomInt } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { db } from "../db";
-import { env, allowedEmailDomains } from "../env";
+import { env, allowedEmailDomains, emailVerificationRequired } from "../env";
 import { badRequest, conflict, AppError } from "../errors";
 import { sendVerificationCode } from "../email";
 import { isAllowedCampusEmail, type SignupInput } from "../validation/auth";
@@ -28,16 +28,19 @@ export async function registerUser(input: SignupInput) {
   }
 
   const passwordHash = await bcrypt.hash(input.password, 10);
+  const requireCode = emailVerificationRequired();
   const user = await db.user.create({
-    data: { name: input.name, email: input.email, passwordHash },
+    // Without code verification the account is active immediately (campus domain already checked).
+    data: { name: input.name, email: input.email, passwordHash, emailVerified: requireCode ? null : new Date() },
     select: { id: true, name: true, email: true },
   });
+  if (!requireCode) return { id: user.id, emailSent: false, verified: true };
   // The account exists either way; if email delivery fails the user can log in and resend.
   try {
     await issueVerificationCode(user);
-    return { id: user.id, emailSent: true };
+    return { id: user.id, emailSent: true, verified: false };
   } catch (err) {
-    if (err instanceof AppError && err.status === 503) return { id: user.id, emailSent: false };
+    if (err instanceof AppError && err.status === 503) return { id: user.id, emailSent: false, verified: false };
     throw err;
   }
 }

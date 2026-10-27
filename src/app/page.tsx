@@ -4,14 +4,14 @@ import { Logo } from "@/components/logo";
 import { ButtonLink } from "@/components/ui";
 
 const STEPS = [
-  { n: "1", title: "Verify with your college email", body: "Everyone here is a student from your campus, so no random strangers and no long trips." },
+  { n: "1", title: "Sign up with your college email", body: "Only campus email addresses can join, so there are no random strangers and no long trips." },
   { n: "2", title: "List or find what you need", body: "Textbooks, calculators, furniture and electronics, searchable and filterable, with real photos." },
   { n: "3", title: "Negotiate, reserve, meet on campus", body: "Make offers in chat. Once a price is agreed the item is reserved for you, so nobody else can grab it." },
 ];
 
 export default async function Landing() {
   const user = await getCurrentUser();
-  if (user) redirect(user.emailVerified ? "/browse" : "/verify");
+  if (user) redirect(user.isVerified ? "/browse" : "/verify");
 
   return (
     <div className="flex min-h-full flex-1 flex-col">

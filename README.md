@@ -17,13 +17,13 @@ Students of a single college, verified by their college email address (e.g. `@ss
 
 CampusCart makes the marketplace software rather than a chat thread:
 
-- **Verified campus membership.** Only allow-listed college email domains can sign up, and an emailed code must be confirmed before a student can list, message or make offers.
+- **Campus-only membership.** Only allow-listed college email domains (exact match) can sign up. An optional emailed-code step (`EMAIL_VERIFICATION=required`) can additionally prove inbox ownership.
 - **A real listing lifecycle** (Available → Reserved → Sold, plus Withdrawn). The rules are enforced on the server, so an item can't be reserved by two buyers at once.
 - **One conversation per buyer per listing.** Price offers sit inside the thread, so the whole negotiation history is visible.
 
 ## Key features
 
-- **Campus-restricted accounts:** domain allowlist (exact match), bcrypt-hashed passwords, 6-digit email verification codes (hashed, 15-minute expiry, 5 attempts), and rate-limited sign-up and login.
+- **Campus-restricted accounts:** domain allowlist (exact match), bcrypt-hashed passwords, and rate-limited sign-up and login. Email-code verification (hashed 6-digit codes, 15-minute expiry, 5 attempts) is built in and switched by `EMAIL_VERIFICATION`. The live deployment runs with it **off**, so accounts are active right after sign-up.
 - **Listings with photos:** title, description, category, condition, integer INR price and campus pickup point. Each listing has 1–5 photos, which are compressed in the browser and uploaded directly to Vercel Blob with per-photo progress, errors and retry. Drafts stay private until published.
 - **Ownership rules:** only the seller can edit, publish or delete. Sold listings are locked. Listings that buyers have already messaged about can only be withdrawn, not deleted.
 - **Search & filters:** prefix keyword search over title and description (Postgres full-text search on a generated, weighted `tsvector` column with a GIN index). Filter by category, condition, price range and status (Available by default, optionally Reserved). Sort by best match, newest or price, with pagination. All state lives in the URL, so searches can be shared and survive a refresh.
@@ -130,7 +130,7 @@ npm run dev                      # http://localhost:3000
 
 Useful scripts: `npm run lint`, `npm run typecheck`, `npm test` (Vitest), `npx vitest run src/lib/validation` (a single test folder).
 
-Without SMTP configured, verification codes are printed in the dev server log.
+With `EMAIL_VERIFICATION=required` and no SMTP configured, verification codes are printed in the dev server log.
 
 ## Environment variables
 
@@ -140,9 +140,10 @@ Without SMTP configured, verification codes are printed in the dev server log.
 | `DATABASE_URL_UNPOOLED` | Neon **direct** connection string, used by Prisma migrations. |
 | `AUTH_SECRET` | Secret for encrypting session cookies (`npx auth secret`). |
 | `ALLOWED_EMAIL_DOMAINS` | Comma-separated, exact-match email domains allowed to sign up. |
+| `EMAIL_VERIFICATION` | `off` (default): no email code, so accounts are active immediately. `required`: users must enter a code sent over SMTP before listing, messaging or making offers. |
 | `BLOB_STORE_ID` | Vercel Blob store ID (set automatically when the store is connected). |
 | `VERCEL_OIDC_TOKEN` | Short-lived OIDC token used by Blob. Injected on Vercel; locally it comes from `vercel env pull`. |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` | SMTP settings for verification emails (e.g. Gmail with an App Password). |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` | SMTP settings for verification emails (e.g. Gmail with an App Password). Only needed when `EMAIL_VERIFICATION=required`. |
 
 ## Demo walkthrough
 
@@ -175,7 +176,7 @@ Deployed on Vercel from the `main` branch: every push builds and deploys. Neon P
 ## Known limitations
 
 - Demo listing photos are generated illustrations (rendered with `sharp` by `prisma/seed-demo.ts`). Uploads by real users store their actual photos.
-- Email delivery depends on the configured SMTP account. Without it in production, new users can't receive their verification code; the demo accounts are pre-verified.
+- Email-code verification is switched off in the live deployment (no SMTP account configured). Sign-up is restricted to campus email domains, but owning the inbox isn't proven. Setting `EMAIL_VERIFICATION=required` plus the SMTP variables turns it back on without code changes.
 - One database serves development and production for this submission. A real deployment would use a separate Neon branch per environment.
 
 - New messages arrive within about 4 seconds (polling), not instantly.

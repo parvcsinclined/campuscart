@@ -35,7 +35,7 @@ export function SignupForm({ domains }: { domains: string[] }) {
     setFieldErrors({});
     setPending(true);
 
-    const res = await api<{ ok: true; emailSent: boolean }>("/api/auth/signup", { body: parsed.data });
+    const res = await api<{ ok: true; emailSent: boolean; verified: boolean }>("/api/auth/signup", { body: parsed.data });
     if (!res.ok) {
       setFieldErrors(res.fieldErrors ?? {});
       setError(res.message);
@@ -45,8 +45,14 @@ export function SignupForm({ domains }: { domains: string[] }) {
 
     const login = await signIn("credentials", { email: parsed.data.email, password: parsed.data.password, redirect: false }).catch(() => null);
     if (!login || login.error) {
-      toast("Account created. Please log in to verify your email.", "info");
+      toast("Account created. Please log in.", "info");
       router.replace("/login");
+      return;
+    }
+    if (res.data.verified) {
+      toast("Welcome to CampusCart!", "success");
+      router.replace("/browse");
+      router.refresh();
       return;
     }
     toast(res.data.emailSent ? "Account created! Check your inbox for a 6-digit code." : "Account created, but we couldn't send the email. Use “Resend code”.", res.data.emailSent ? "success" : "error");

@@ -8,6 +8,10 @@ describe("checkVerified", () => {
   it("rejects unverified users", () => {
     expect(checkVerified({ id: "u1", emailVerified: null })).toBe("not_verified");
   });
+  it("treats unverified users as ok when verification is switched off", () => {
+    expect(checkVerified({ id: "u1", emailVerified: null }, false)).toBe("ok");
+    expect(checkVerified(null, false)).toBe("unauthenticated");
+  });
   it("accepts verified users", () => {
     expect(checkVerified({ id: "u1", emailVerified: new Date() })).toBe("ok");
   });
