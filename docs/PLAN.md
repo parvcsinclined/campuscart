@@ -368,7 +368,8 @@ Times are estimates, starting at about 17:00 IST. Total ≈ 6½ h, leaving rough
 ### Phase 1 — Setup, auth, campus restriction, first deploy (~75 min)
 - [x] Install `gh` and `vercel` CLIs, set git identity, confirm the GitHub repo exists
 - [x] Scaffold Next.js + Tailwind + ESLint + Vitest; Prisma init; `.env.example`
-- [x] Vercel project link; add Neon and Blob from the Storage tab (you click); `vercel env pull`
+- [x] Vercel project link; add Neon from the Storage tab; `vercel env pull`
+- [ ] Blob store connected to the project (BLOB_READ_WRITE_TOKEN missing; needed for Phase 2)
 - [x] Full schema + first migration (including the partial index and tsvector)
 - [x] `env.ts`, `errors.ts`, `rate-limit.ts`, `authz.ts`, `email.ts`
 - [x] Sign up with domain allowlist, bcrypt, Auth.js credentials login, verify code, logout
