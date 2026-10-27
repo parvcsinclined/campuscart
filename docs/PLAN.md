@@ -393,21 +393,21 @@ Times are estimates, starting at about 17:00 IST. Total ≈ 6½ h, leaving rough
 - [x] Check → commit → push → deploy → smoke test
 
 ### Phase 4 — Inquiries, messaging, offers (~75 min)
-- [ ] Open or reuse a conversation; owner blocked
-- [ ] Thread page, send message, 4s polling (paused while the tab is hidden), read markers
-- [ ] Inbox with unread counts and nav badge
-- [ ] Offer create/accept/reject/counter/withdraw (accept → reserve wired in Phase 5) and offer cards in the thread
-- [ ] Unit tests for offer rules
-- [ ] Check → commit → push → deploy → smoke test
+- [x] Open or reuse a conversation; owner blocked
+- [x] Thread page, send message, 4s polling (paused while the tab is hidden), read markers
+- [x] Inbox with unread counts and nav badge
+- [x] Offer create/accept/reject/counter/withdraw (accept → reserve wired in Phase 5) and offer cards in the thread
+- [x] Unit tests for offer rules
+- [x] Check → commit → push → deploy → smoke test
 
 ### Phase 5 — Reservations, completion, lifecycle (~75 min)
-- [ ] `listing-state.ts` + unit tests
-- [ ] `transitionListing` with atomic updates, events, offer expiry and system messages
-- [ ] Accept offer → reserve; seller reserve, cancel, complete; buyer back out; withdraw and relist
-- [ ] Lazy 48h expiry
-- [ ] Seller timeline; My purchases and My sales
-- [ ] Concurrency check (two simultaneous reserve requests → one 200, one 409)
-- [ ] Check → commit → push → deploy → smoke test
+- [x] `listing-state.ts` + unit tests
+- [x] `transitionListing` with atomic updates, events, offer expiry and system messages
+- [x] Accept offer → reserve; seller reserve, cancel, complete; buyer back out; withdraw and relist
+- [x] Lazy 48h expiry
+- [x] Seller timeline; My purchases and My sales
+- [x] Concurrency check (two simultaneous reserve requests → one 200, one 409)
+- [x] Check → commit → push → deploy → smoke test
 
 ### Phase 6 — Polish, tests, seed, README, final deploy (~60 min)
 - [ ] Loading, empty and error states on every page; toasts; mobile pass
